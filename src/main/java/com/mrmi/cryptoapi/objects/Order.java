@@ -1,12 +1,11 @@
 package com.mrmi.cryptoapi.objects;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Order {
-    private Long id;
+    public long id;
     private final String currencyPair = "BTCUSD";
     private LocalDateTime createdDateTime;
     private String type; // BUY or SELL
@@ -16,7 +15,7 @@ public class Order {
     private String status; // OPEN or CLOSED
     private List<Trade> trades;
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
