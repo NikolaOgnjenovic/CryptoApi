@@ -1,8 +1,8 @@
 package com.mrmi.cryptoapi.objects;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Order {
     public long id;
@@ -13,7 +13,7 @@ public class Order {
     private double quantity;
     private double filledQuantity = 0;
     private String status; // OPEN or CLOSED
-    private List<Trade> trades;
+    private List<Trade> trades = new ArrayList<>();
 
     public long getId() {
         return id;
@@ -85,5 +85,9 @@ public class Order {
 
     public void setTrades(List<Trade> trades) {
         this.trades = trades;
+    }
+
+    public void addTrade(Trade trade) {
+        this.trades.add(trade);
     }
 }

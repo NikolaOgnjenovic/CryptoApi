@@ -41,7 +41,6 @@ public class OrderService {
             }
         }
 
-        List<Trade> orderTradeList = new ArrayList<>();
         double orderQuantity = order.getQuantity();
         order.setFilledQuantity(0);
 
@@ -56,13 +55,13 @@ public class OrderService {
             2) buy it if the open sell order's price <= the buy order's price
             2) if the open sell order's price is > the buy order's price break
             */
+
             int openOrderIndex = 0;
-            double givenOrderPrice = order.getPrice();
-            double openOrderPrice = openOrders.get(openOrderIndex).getPrice();
+            Order openOrder = openOrders.get(openOrderIndex);
 
             while (orderQuantity > 0) {
-                if (openOrderPrice < givenOrderPrice) {
-                    double openOrderQuantity = openOrders.get(openOrderIndex).getQuantity();
+                if (openOrder.getPrice() <= order.getPrice()) {
+                    double openOrderQuantity = openOrder.getQuantity();
 
                     // If 6 sell orders are open and 10 are being bought, buy 10 - 6 = 4 will be purchased
                     double purchasedAmount = orderQuantity;
@@ -75,19 +74,26 @@ public class OrderService {
 
                     // Increase the filled (realised) quantity of the given buy order
                     order.increaseFilledQuantity(purchasedAmount);
+                    openOrder.setQuantity(openOrder.getQuantity() - purchasedAmount);
+                    openOrder.increaseFilledQuantity(purchasedAmount);
+
+                    Trade trade = tradeService.createTrade(
+                            openOrder.getId(),
+                            order.getId(),
+                            openOrder.getPrice() * purchasedAmount,
+                            purchasedAmount);
 
                     // Add the trade to the list
-                    orderTradeList.add(tradeService.createTrade(
-                            openOrders.get(openOrderIndex).getId(),
-                            order.getId(),
-                            purchasedAmount * openOrderPrice,
-                            purchasedAmount)
-                    );
+                    order.addTrade(trade);
+                    openOrder.addTrade(trade);
 
-                    // Close the current open sell order, iterate to the next open sell order, update the sell price
-                    openOrders.get(openOrderIndex).setStatus("CLOSED");
-                    openOrderIndex += 1;
-                    openOrderPrice = openOrders.get(openOrderIndex).getPrice();
+                    // If the whole order was purchased/sold, close it
+                    if (openOrder.getQuantity() <= 0) {
+                        openOrder.setStatus("CLOSED");
+                    }
+
+                    // Iterate to the next open order
+                    openOrderIndex++;
                 } else {
                     break;
                 }
@@ -95,7 +101,6 @@ public class OrderService {
         }
 
         // Fill in the remanining fields for the order
-        order.setTrades(orderTradeList);
         order.setQuantity(orderQuantity);
 
         // If all purchases haven't been made, mark the buy order as open
@@ -135,7 +140,7 @@ public class OrderService {
         tradeService.deleteTrades();
     }
 
-    public Order getOrder(int id) {
-        return orderBookService.getOrder(id);
+    public Order getOrderById(int id) {
+        return orderBookService.getOrderById(id);
     }
 }

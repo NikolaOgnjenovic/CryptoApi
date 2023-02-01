@@ -19,11 +19,13 @@ public class OrderController {
         return orderService.processOrder(order);
     }
 
+    // GET localhost:8080/order/1
     @GetMapping(path="/{id}")
     public Order order(@PathVariable(name="id") int id) {
-        return orderService.getOrder(id);
+        return orderService.getOrderById(id);
     }
 
+    // DELETE localhost:8080/all
     @DeleteMapping(path="/all")
     public void deleteAll() {
         orderService.deleteOrders();

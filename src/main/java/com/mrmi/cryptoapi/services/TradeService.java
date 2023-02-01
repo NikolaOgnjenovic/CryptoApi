@@ -10,6 +10,8 @@ import java.util.List;
 @Service
 public class TradeService {
     private Long tradeId = 0L;
+
+    // TODO: Save trade list in a database
     private final List<Trade> tradeList = new ArrayList<>(); // TODO: save in database
     public Trade createTrade(Long buyOrderId, Long sellOrderId, double price, double quantity) {
         tradeId += 1;

@@ -4,7 +4,6 @@ import com.mrmi.cryptoapi.objects.Order;
 import com.mrmi.cryptoapi.objects.OrderBook;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -39,11 +38,18 @@ public class OrderBookService {
         orderBook.deleteOrders();
     }
 
-    public Order getOrder(int id) {
-        try {
-            return getBuyOrders().get(id);
-        } catch (Exception e) {
-            return getSellOrders().get(id);
+    public Order getOrderById(int id) {
+        for (Order o : getBuyOrders()) {
+            if (o.getId() == id) {
+                return o;
+            }
         }
+        for (Order o : getSellOrders()) {
+            if (o.getId() == id) {
+                return o;
+            }
+        }
+
+        throw new IllegalStateException("Order with id "  + id + " does not exist.");
     }
 }
