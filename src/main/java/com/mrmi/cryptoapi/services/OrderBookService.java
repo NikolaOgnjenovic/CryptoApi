@@ -1,5 +1,6 @@
 package com.mrmi.cryptoapi.services;
 
+import com.mrmi.cryptoapi.exceptions.OrderNotFoundException;
 import com.mrmi.cryptoapi.objects.Order;
 import com.mrmi.cryptoapi.objects.OrderBook;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,6 @@ public class OrderBookService {
             }
         }
 
-        throw new IllegalStateException("Order with id "  + id + " does not exist.");
+        throw new OrderNotFoundException("Order with id "  + id + " does not exist.");
     }
 }

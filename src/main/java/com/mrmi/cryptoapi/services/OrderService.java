@@ -1,5 +1,6 @@
 package com.mrmi.cryptoapi.services;
 
+import com.mrmi.cryptoapi.exceptions.InvalidOrderException;
 import com.mrmi.cryptoapi.objects.Order;
 import com.mrmi.cryptoapi.objects.Trade;
 import org.springframework.stereotype.Service;
@@ -57,17 +58,16 @@ public class OrderService {
             */
 
             int openOrderIndex = 0;
-            Order openOrder = openOrders.get(openOrderIndex);
+            Order openOrder;
 
             while (orderQuantity > 0) {
-                if (openOrder.getPrice() <= order.getPrice()) {
-                    double openOrderQuantity = openOrder.getQuantity();
+                if (openOrderIndex >= openOrders.size()) {
+                    break;
+                }
+                openOrder = openOrders.get(openOrderIndex);
 
-                    // If 6 sell orders are open and 10 are being bought, buy 10 - 6 = 4 will be purchased
-                    double purchasedAmount = orderQuantity;
-                    if (orderQuantity > openOrderQuantity) {
-                        purchasedAmount -= openOrderQuantity;
-                    }
+                if (openOrder.getPrice() <= order.getPrice()) {
+                    double purchasedAmount = Math.min(orderQuantity, openOrder.getQuantity());
 
                     // Decrease the quantity of buy orders
                     orderQuantity -= purchasedAmount;
@@ -122,16 +122,16 @@ public class OrderService {
 
     private void validateOrder(Order order) {
         if(!order.getCurrencyPair().equals("BTCUSD")) {
-            throw new IllegalStateException("An order cannot have " + order.getCurrencyPair() + " as a currency pair.");
+            throw new InvalidOrderException("An order cannot have " + order.getCurrencyPair() + " as a currency pair.");
         }
         if (Objects.isNull(order.getType()) || !(order.getType().equals("BUY") || order.getType().equals("SELL"))) {
-            throw new IllegalStateException("The order type " + order.getType() + " is not valid.");
+            throw new InvalidOrderException("The order type " + order.getType() + " is not valid.");
         }
         if (order.getPrice() < 0) {
-            throw new IllegalStateException("An order cannot have the negative price " + order.getPrice());
+            throw new InvalidOrderException("An order cannot have the negative price " + order.getPrice());
         }
         if (order.getQuantity() < 0) {
-            throw new IllegalStateException("An order cannot have a negative quantity of " + order.getQuantity());
+            throw new InvalidOrderException("An order cannot have a negative quantity of " + order.getQuantity());
         }
     }
 
