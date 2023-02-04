@@ -12,7 +12,7 @@ public class TradeService {
     private Long tradeId = 0L;
 
     // TODO: Save trade list in a database
-    private final List<Trade> tradeList = new ArrayList<>(); // TODO: save in database
+    private final List<Trade> tradeList = new ArrayList<>();
     public Trade createTrade(Long buyOrderId, Long sellOrderId, double price, double quantity) {
         tradeId += 1;
         Trade trade = new Trade(tradeId, buyOrderId, sellOrderId, LocalDateTime.now(), price, quantity);

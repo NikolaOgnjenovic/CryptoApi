@@ -6,10 +6,9 @@ import com.mrmi.cryptoapi.objects.Trade;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -26,37 +25,23 @@ public class OrderService {
 
         boolean buying = order.getType().equals("BUY");
 
-        List<Order> givenOrders;
-        if (buying) {
-            // Get all OPEN SELL orders
-            givenOrders = orderBookService.getSellOrders();
-        } else {
-            // Get all OPEN BUY orders
-            givenOrders = orderBookService.getBuyOrders();
+        // Get open buy/sell orders depending on if the order is a sell/buy order
+        List<Order> openOrders = orderBookService.getSellOrders();
+        if (!buying) {
+            openOrders = orderBookService.getBuyOrders();
         }
-
-        List<Order> openOrders = new ArrayList<>();
-        for (Order o : givenOrders){
-            if (o.getStatus().equals("OPEN")) {
-                openOrders.add(o);
-            }
-        }
+        openOrders = openOrders.stream().filter(o -> o.getStatus().equals("OPEN")).collect(Collectors.toList());
 
         double orderQuantity = order.getQuantity();
         order.setFilledQuantity(0);
 
-        if (openOrders.size() > 0) {
-            // Sort available orders by price
-            // TODO: Store them sorted by price in the database
-            openOrders.sort(Comparator.comparing(Order::getPrice));
-
-            /*
+        /*
             Untill all orders are bought:
             1) go through each open sell order
             2) buy it if the open sell order's price <= the buy order's price
             2) if the open sell order's price is > the buy order's price break
-            */
-
+        */
+        if (openOrders.size() > 0) {
             int openOrderIndex = 0;
             Order openOrder;
 
@@ -66,7 +51,8 @@ public class OrderService {
                 }
                 openOrder = openOrders.get(openOrderIndex);
 
-                if (openOrder.getPrice() <= order.getPrice()) {
+                if (buying && (openOrder.getPrice() <= order.getPrice())
+                || !buying && (order.getPrice() <= openOrder.getPrice())){
                     double purchasedAmount = Math.min(orderQuantity, openOrder.getQuantity());
 
                     // Decrease the quantity of buy orders
@@ -80,7 +66,8 @@ public class OrderService {
                     Trade trade = tradeService.createTrade(
                             openOrder.getId(),
                             order.getId(),
-                            openOrder.getPrice() * purchasedAmount,
+                            // Round the price to 2 decimal places
+                            Math.round((openOrder.getPrice() * purchasedAmount) * 100.0) / 100.0,
                             purchasedAmount);
 
                     // Add the trade to the list

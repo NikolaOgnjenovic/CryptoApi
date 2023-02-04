@@ -11,9 +11,20 @@ public class Order {
     private String type; // BUY or SELL
     private double price;
     private double quantity;
-    private double filledQuantity = 0;
+    private double filledQuantity;
     private String status; // OPEN or CLOSED
-    private List<Trade> trades = new ArrayList<>();
+    private List<Trade> trades;
+
+    public Order(long id, LocalDateTime createdDateTime, String type, double price, double quantity, double filledQuantity, String status, List<Trade> trades) {
+        this.id = id;
+        this.createdDateTime = createdDateTime;
+        this.type = type;
+        this.price = price;
+        this.quantity = quantity;
+        this.filledQuantity = filledQuantity;
+        this.status = status;
+        this.trades = trades;
+    }
 
     public long getId() {
         return id;
@@ -48,7 +59,8 @@ public class Order {
     }
 
     public void setPrice(double price) {
-        this.price = price;
+        // Round the price to 2 decimal points
+        this.price = Math.round(price * 100.0) / 100.0;
     }
 
     public double getQuantity() {

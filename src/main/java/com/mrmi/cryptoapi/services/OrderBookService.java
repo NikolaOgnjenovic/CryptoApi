@@ -23,8 +23,22 @@ public class OrderBookService {
         return orderBook.getSellOrders();
     }
 
+    public List<Order> getOpenSellOrders() {
+        return orderBook.getSellOrders()
+                .stream()
+                .filter(o -> o.getStatus().equals("OPEN"))
+                .toList();
+    }
+
     public List<Order> getBuyOrders() {
         return orderBook.getBuyOrders();
+    }
+
+    public List<Order> getOpenBuyOrders() {
+        return orderBook.getBuyOrders()
+                .stream()
+                .filter(o -> o.getStatus().equals("OPEN"))
+                .toList();
     }
 
     public void addBuyOrder(Order order) {
